@@ -15,6 +15,7 @@ local schema = {
           -- a standard defined field (typedef), with some customizations
           { host = { type = "string", required = true }, },
           { port = { type = "number", required = true }, },
+          { field = { type = "string", required = false }, },
           -- verificação de aprofundade
           -- validação do certificados
           --{ backend_path = { type = "string", required = true }, },

@@ -1,34 +1,11 @@
--- If you're not sure your plugin is executing, uncomment the line below and restart Kong
--- then it will throw an error which indicates the plugin is being loaded at least.
-
---assert(ngx.get_phase() == "timer", "The world is coming to an end!")
-
----------------------------------------------------------------------------------------------
--- In the code below, just remove the opening brackets; `[[` to enable a specific handler
---
--- The handlers are based on the OpenResty handlers, see the OpenResty docs for details
--- on when exactly they are invoked and what limitations each handler has.
----------------------------------------------------------------------------------------------
-
-
-
 local plugin = {
   PRIORITY = 1000, -- set the plugin priority, which determines plugin execution order
   VERSION = "0.1.0", -- version in X.Y.Z format. Check hybrid-mode compatibility requirements.
 }
 
-local http = require("resty.http")
 local json = require("lunajson")
 local socket = require("socket")
-
 local ngx = ngx
-
-function plugin:init_worker()
-
-  -- your custom code here
-  kong.log.debug("saying hi from the 'init_worker' handler")
-
-end --]]
 
 --- Exit with an unauthorized http response
 local function response_error_exit(http_status, msg)
@@ -46,59 +23,66 @@ local function rewrite_body(response)
   return json_string
 end
 
--- runs in the 'access_by_lua_block'
-function plugin:access(plugin_conf)
+local function translate(client, response_msg)
+  if client then
+    print("Connected to server")
+    -- Send data to the server
+    client:send(response_msg .. "\n")
+  
+    -- Receive the servers response
+    local response, err = client:receive()
+    if response then
+      print("Received response from server:", response)
+    else
+      print("Error receiving response:", err)
+    end
+    
+    local json_string = rewrite_body(response)
+    ngx.ctx.response_data = json_string
 
-  -- your custom code here
-kong.log("phase access custom")
-kong.log.inspect(plugin_conf)   -- check the logs for a pretty-printed config!
-
-local host = plugin_conf.host
-local port = plugin_conf.port
-
--- Create a socket client
-local client = socket.connect(host, port)
-
-if client then
-  print("Connected to server")
-
-  local message = "É um livro ou pilha de páginas de papel que geralmente são pautadas e usadas para fins como fazer anotações"
-  print("Sending data to server:", message)
-
-  -- Send data to the server
-  client:send(message .. "\n")
-
-  -- Receive the servers response
-  local response, err = client:receive()
-  if response then
-    print("Received response from server:", response)
+    -- Close the client socket
+    client:close()
   else
-    print("Error receiving response:", err)
+    print("Failed to connect to the server")
   end
   
-  local json_string = rewrite_body(response)
-  ngx.ctx.response_data = json_string
-  kong.response.set_header("content-length", #json_string)
-
-  -- Close the client socket
-  client:close()
-else
-  print("Failed to connect to the server")
 end
 
+-- runs in the 'access_by_lua_block'
+function plugin:access(plugin_conf)
+  -- It is required to body_filter read the body
+  kong.service.request.enable_buffering()
 end
 
 function plugin:body_filter(plugin_conf)
-  local body = kong.response.get_raw_body()
-  if body ~= nil then
-    kong.log.inspect(body)
-  end
 
-  kong.response.set_raw_body(ngx.ctx.response_data)
+  local body_code_location = plugin_conf.field
+
+  if body_code_location ~= nil then
+
+    local host = plugin_conf.host
+    local port = plugin_conf.port
+
+    -- Create a socket client
+    local client = socket.connect(host, port)
+
+    local funcstr = "local attr = kong.service.response.get_body()." .. body_code_location .. "; return attr;"
+    local result, vars = pcall(load(funcstr))
+
+    -- Example description
+    translate(client, vars)
+    if result == false then
+      -- `loadstring(funcstr)' raised an error: take appropriate actions
+      -- return response_error_exit(403, "You shall not pass")
+      return "Attribute " .. body_code_location .. "not found"
+    end
+    kong.response.set_raw_body(ngx.ctx.response_data)
+  end
 end
 
 function plugin:header_filter(plugin_conf)
-  -- kong.response.set_header("content-length", 0)
+  -- header_filter > body_filter
+  kong.response.clear_header("content-length")
 end
 
 -- return our plugin object

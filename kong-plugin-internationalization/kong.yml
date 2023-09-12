@@ -32,3 +32,24 @@ services:
       config:
         host: "192.168.1.103"
         port: 12345
+- name: ecommerce-service
+  url: http://192.168.1.103:8080
+  retries: 0
+  connect_timeout: 5000
+  write_timeout: 5000
+  read_timeout: 5000
+  routes:
+  - name: my-product
+    regex_priority: 200
+    strip_path: false
+    methods: [GET]
+    protocols: [http]
+    response_buffering: false
+    paths:
+    - /product
+    plugins:
+    - name: kong-plugin-internationalization
+      config:
+        host: "192.168.1.103"
+        port: 12345
+        field: description
