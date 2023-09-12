@@ -1,0 +1,34 @@
+_format_version: "2.1"
+_transform: true
+services:
+- name: httpbin-service
+  url: https://httpbin.org
+  retries: 0
+  connect_timeout: 5000
+  write_timeout: 5000
+  read_timeout: 5000
+  routes:
+  - name: my-route-uuid
+    regex_priority: 200
+    strip_path: false
+    methods: [GET]
+    protocols: [http]
+    paths:
+    - /uuid
+    plugins:
+    - name: kong-plugin-internationalization
+      config:
+        host: "192.168.1.103"
+        port: 12345
+  - name: my-route-anything
+    regex_priority: 200
+    strip_path: false
+    methods: [GET]
+    protocols: [http]
+    paths:
+    - /anything
+    plugins:
+    - name: kong-plugin-internationalization
+      config:
+        host: "192.168.1.103"
+        port: 12345
