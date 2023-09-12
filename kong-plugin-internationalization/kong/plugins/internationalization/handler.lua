@@ -36,14 +36,14 @@ local function response_error_exit(http_status, msg)
   return kong.response.exit(http_status, '{"message": "' .. msg .. '"}')
 end
 
-local function rewrite_body()
+local function rewrite_body(response)
   local data = {
-    msg = ngx.ctx.response_data
+    msg = response
   }
 
   local json_string = json.encode(data)
 
-  kong.response.set_header("content-length", #json_string)
+  return json_string
 end
 
 -- runs in the 'access_by_lua_block'
@@ -75,8 +75,11 @@ if client then
   else
     print("Error receiving response:", err)
   end
-  ngx.ctx.response_data = response
-  rewrite_body()
+  
+  local json_string = rewrite_body(response)
+  ngx.ctx.response_data = json_string
+  kong.response.set_header("content-length", #json_string)
+
   -- Close the client socket
   client:close()
 else
@@ -91,12 +94,7 @@ function plugin:body_filter(plugin_conf)
     kong.log.inspect(body)
   end
 
-  local data = {
-    msg = ngx.ctx.response_data
-  }
-
-  local json_string = json.encode(data)
-  kong.response.set_raw_body(json_string)
+  kong.response.set_raw_body(ngx.ctx.response_data)
 end
 
 function plugin:header_filter(plugin_conf)
