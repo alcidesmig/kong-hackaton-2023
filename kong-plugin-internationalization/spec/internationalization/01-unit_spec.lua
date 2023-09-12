@@ -1,0 +1,6 @@
+--local PLUGIN_NAME = "internationalization"
+--
+--describe(PLUGIN_NAME .. ": (schema)", function()
+--
+--
+--end)
