@@ -36,9 +36,7 @@ local function response_error_exit(http_status, msg)
   return kong.response.exit(http_status, '{"message": "' .. msg .. '"}')
 end
 
-local function rewrite_body(response)
-  
-
+local function rewrite_body()
   local data = {
     msg = ngx.ctx.response_data
   }
@@ -77,8 +75,8 @@ if client then
   else
     print("Error receiving response:", err)
   end
-
-  rewrite_body(response)
+  ngx.ctx.response_data = response
+  rewrite_body()
   -- Close the client socket
   client:close()
 else
