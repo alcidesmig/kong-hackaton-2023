@@ -1,7 +1,6 @@
 # kong-hackaton-2023
 
 
-
 ## Translation Engine
 
 The "translator" folder contains one translation engine capable of identifying, translating and caching content for the following languages (as both origin or target language)
