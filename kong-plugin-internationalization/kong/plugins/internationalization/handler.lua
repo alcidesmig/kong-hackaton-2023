@@ -56,12 +56,17 @@ end
 
 function plugin:body_filter(plugin_conf)
 
-  local body_code_location = plugin_conf.field
+  local body_code_location = plugin_conf.body_location_field
+  local translate_to_header = plugin_conf.translate_to_header
+
+  local translate_to = kong.request.get_header("X-Translate-To")
+
+  kong.log.inspect(translate_to)
 
   if body_code_location ~= nil then
 
-    local host = plugin_conf.host
-    local port = plugin_conf.port
+    local host = plugin_conf.socket_host
+    local port = plugin_conf.socket_port
 
     -- Create a socket client
     local client = socket.connect(host, port)
@@ -69,6 +74,14 @@ function plugin:body_filter(plugin_conf)
     local funcstr = "local attr = kong.service.response.get_body()." .. body_code_location .. "; return attr;"
     local result, vars = pcall(load(funcstr))
 
+    -- X-Translate-To:Portuguese;
+    if translate_to ~= nil and translate_to ~= "" then
+      local pattern = "X-Translate-To:" .. translate_to .. ";"
+      local data = vars
+      vars = pattern .. data
+      kong.log.inspect(vars)
+    end
+    
     -- Example description
     translate(client, vars)
     if result == false then

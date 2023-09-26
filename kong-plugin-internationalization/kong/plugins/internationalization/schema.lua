@@ -13,19 +13,11 @@ local schema = {
         type = "record",
         fields = {
           -- a standard defined field (typedef), with some customizations
-          { host = { type = "string", required = true }, },
-          { port = { type = "number", required = true }, },
-          { field = { type = "string", required = false }, },
-          -- verificação de aprofundade
-          -- validação do certificados
-          --{ backend_path = { type = "string", required = true }, },
-          --{ vault_token = { type = "string", required = true }, },
-          --{ body_code_location = { type = "string", required = false }, },
-          --{ header_code_location = { type = "string", required = false }, },
+          { socket_host = { type = "string", required = true }, },
+          { socket_port = { type = "number", required = true }, },
+          { body_location_field = { type = "string", required = false }, },
+          { translate_to_header = { type = "string", required = false }, },
         },
-       -- entity_checks = {
-       --   { only_one_of = { "body_code_location", "header_code_location" } },
-       -- }
       },
     },
   },

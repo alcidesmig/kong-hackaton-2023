@@ -6,7 +6,7 @@ authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 dl-translate = "^0.3.0"
 torch = ">=2.0.0, !=2.0.1"
 redis = {extras = ["hiredis"], version = "^5.0.0"}
