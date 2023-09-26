@@ -15,7 +15,7 @@ local schema = {
           -- a standard defined field (typedef), with some customizations
           { socket_host = { type = "string", required = true }, },
           { socket_port = { type = "number", required = true }, },
-          { body_location_field = { type = "string", required = false }, },
+          { body_location_field = { type = "string", required = true }, },
           { translate_to_header = { type = "string", required = false }, },
         },
       },

@@ -1,10 +1,12 @@
 # kong-hackaton-2023
 
-
 ## About this project
 
 This project is a Lua-based plugin for Kong API Gateway that help translate specific field in jsonto english or other language was set in header.
 
+The plugin operates by intercepting the response from the upstream, then forwarding this response to the translation server via Kong, and ultimately responding to the client with the translated message.
+
+It's necessary to configure the field to retrieve the value from the response body for translation and it also provides the capability to set a different destination language through the header.
 
 <b>We are testing this plugin yet, so It is possible to find some bugs. Please report bugs!</b>
 
@@ -15,7 +17,7 @@ This project is a Lua-based plugin for Kong API Gateway that help translate spec
 |----------------------|----------|-------------|---------------|--------|
 | socket_host          | true         | Host from Translate Server           |               | String |
 | socket_port         | true         | Port from Translate Server         |               | Number |
-| body_location_field   | false        | If defined , the plugin code will get field from request.body.<configuration>            |               | String |
+| body_location_field   | true        | If defined , the plugin code will get field from request.body.<configuration>            |               | String |
 | translate_to_header | false        | If defined , set the translate language destination.       |               | String |
 
 ### Enabling the plugin on a Service
@@ -48,6 +50,30 @@ services:
         socket_host: "localhost"
         socket_port: 25564
         body_location_field: description
+```
+
+### Using APIs
+
+Curl Examples
+
+## Ecommerce API
+
+```bash
+curl backend:8000/products/5293b118-d8c2-4c63-b5bf-027eec118126
+```
+
+## Kong API
+
+Translate Portugues to English
+
+```bash
+curl kong-gateway:8000/products/5293b118-d8c2-4c63-b5bf-027eec118126
+```
+
+Translate Portugues to Italian
+
+```bash
+curl kong-gateway:8000/products/5293b118-d8c2-4c63-b5bf-027eec118126 -H "X-Translate-To: Italian"
 ```
 
 ## Translation Engine
