@@ -15,7 +15,7 @@ end
 
 local function rewrite_body(response)
   local data = {
-    msg = response
+    detail = response
   }
 
   local json_string = json.encode(data)
@@ -28,7 +28,7 @@ local function translate(client, response_msg)
     print("Connected to server")
     -- Send data to the server
     client:send(response_msg .. "\n")
-  
+
     -- Receive the servers response
     local response, err = client:receive()
     if response then
@@ -36,7 +36,7 @@ local function translate(client, response_msg)
     else
       print("Error receiving response:", err)
     end
-    
+
     local json_string = rewrite_body(response)
     ngx.ctx.response_data = json_string
 
@@ -45,7 +45,7 @@ local function translate(client, response_msg)
   else
     print("Failed to connect to the server")
   end
-  
+
 end
 
 -- runs in the 'access_by_lua_block'
@@ -81,7 +81,7 @@ function plugin:body_filter(plugin_conf)
       vars = pattern .. data
       kong.log.inspect(vars)
     end
-    
+
     -- Example description
     translate(client, vars)
     if result == false then

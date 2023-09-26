@@ -18,7 +18,7 @@ services:
     plugins:
     - name: kong-plugin-internationalization
       config:
-        socket_host: "192.168.1.108"
+        socket_host: "localhost"
         socket_port: 25564
   - name: my-route-anything
     regex_priority: 200
@@ -30,10 +30,10 @@ services:
     plugins:
     - name: kong-plugin-internationalization
       config:
-        socket_host: "192.168.1.108"
+        socket_host: "localhost"
         socket_port: 25564
 - name: ecommerce-service
-  url: http://192.168.1.108:8080
+  url: http://localhost:8080
   retries: 0
   connect_timeout: 5000
   write_timeout: 5000
@@ -46,10 +46,10 @@ services:
     protocols: [http]
     response_buffering: false
     paths:
-    - /product
+    - /products/
     plugins:
     - name: kong-plugin-internationalization
       config:
-        socket_host: "192.168.1.108"
+        socket_host: "localhost"
         socket_port: 25564
         body_location_field: description
