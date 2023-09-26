@@ -2,29 +2,26 @@
 
 ## About this project
 
-This project is a Lua-based plugin for Kong API Gateway that help translate specific field in jsonto english or other language was set in header.
+This project is a Lua-based plugin for Kong API Gateway that help translate specific fields in json to more than 60 languages. The default target language is English, but it can be changed with the use of the "X-Translate-To" header.
 
-The plugin operates by intercepting the response from the upstream, then forwarding this response to the translation server via Kong, and ultimately responding to the client with the translated message.
+The plugin operates by intercepting the response from the upstream, forwarding it to the translation server via socket, and responding to the client with the translated message.
 
-It's necessary to configure the field to retrieve the value from the response body for translation and it also provides the capability to set a different destination language through the header.
-
-<b>We are testing this plugin yet, so It is possible to find some bugs. Please report bugs!</b>
+<b>The plugin still in experimentation phase, so it is possible to find some bugs - please report it!</b>
 
 
 ### Kong Plugin Configuration Parameters
 
 | Parameter name       | Required | Description | Default value | Type   |
 |----------------------|----------|-------------|---------------|--------|
-| socket_host          | true         | Host from Translate Server           |               | String |
-| socket_port         | true         | Port from Translate Server         |               | Number |
-| body_location_field   | true        | If defined , the plugin code will get field from request.body.<configuration>            |               | String |
-| translate_to_header | false        | If defined , set the translate language destination.       |               | String |
+| socket_host          | true         |  Translate Server Address           |               | String |
+| socket_port         | true         | Translate Server Port         |               | Number |
+| body_location_field   | true        | If defined, the plugin code will get field from request.body.<configuration>            |               | String |
+| translate_to_header | false        | If defined, set the target translate language via Header.       |               | String |
 
 ### Enabling the plugin on a Service
 
 Configure this plugin on a Service with the declarative configuration:
 
-Receiving otp code in the body
 ```bash
 _format_version: "2.1"
 _transform: true
@@ -54,23 +51,25 @@ services:
 
 ### Using APIs
 
-Curl Examples
+The `docker-compose.yml` file brings some example setup. After running `docker-compose up -d`, it is possible to test the setup with the following calls:
 
-## Ecommerce API
+#### E-commerce example API
+
+Calls the back-end directly:
 
 ```bash
 curl backend:8000/products/5293b118-d8c2-4c63-b5bf-027eec118126
 ```
 
-## Kong API
+#### Kong API
 
-Translate Portugues to English
+Translate back-end (Portugues) to default language (English):
 
 ```bash
 curl kong-gateway:8000/products/5293b118-d8c2-4c63-b5bf-027eec118126
 ```
 
-Translate Portugues to Italian
+Translate back-end (Portugues) to specific language (Italian):
 
 ```bash
 curl kong-gateway:8000/products/5293b118-d8c2-4c63-b5bf-027eec118126 -H "X-Translate-To: Italian"
@@ -112,9 +111,9 @@ However, the engine can run directly on the CPU. In this case, it is recommended
 This plugin is still evolving, and the next features planned are:
 
 - add test cases
-- made a performance test
-- improves performance between the kong plugin and the Translate Server
-- add AI Models describe product by image
+- make a performance test
+- improves performance between the Kong Plugin and the Translate Server
+- add AI Models to describe images
 - add other AI Models
 - voice response with product description
 - publish a release of the plugin at luarocks.org
